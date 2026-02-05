@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spanish Conjugation Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 1.5em;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .feedback {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Spanish Conjugation Trainer</h1>
+
+<p id="prompt"></p>
+
+<input
+  id="answer"
+  placeholder="Type the Spanish verb form"
+  autocomplete="off"
+/>
+
+<button onclick="checkAnswer()">Check</button>
+
+<p class="feedback" id="feedback"></p>
+
+<script>
+/* -----------------------------
+   DATA
+--------------------------------*/
+
+const verbs = {
+  vivir: {
+    type: "regular-ir",
+    imperfect: {
+      yo: ["vivía"],
+      tu: ["vivías"],
+      el: ["vivía"],
+      nosotros: ["vivíamos"],
+      vosotros: ["vivíais"],
+      ellos: ["vivían"]
+    }
+  },
+  tener: {
+    type: "irregular",
+    imperfect: {
+      yo: ["tenía"],
+      tu: ["tenías"],
+      el: ["tenía"],
+      nosotros: ["teníamos"],
+      vosotros: ["teníais"],
+      ellos: ["tenían"]
+    }
+  }
+};
+
+const subjects = {
+  yo: "I",
+  tu: "You (sing.)",
+  el: "He / She",
+  nosotros: "We",
+  vosotros: "You (pl.)",
+  ellos: "They"
+};
+
+/* -----------------------------
+   STATE
+--------------------------------*/
+
+let currentVerb;
+let currentSubject;
+
+/* -----------------------------
+   UTILITIES
+--------------------------------*/
+
+function stripAccents(text) {
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/* -----------------------------
+   CORE LOGIC
+--------------------------------*/
+
+function newQuestion() {
+  const verbKeys = Object.keys(verbs);
+  currentVerb = verbKeys[Math.floor(Math.random() * verbKeys.length)];
+
+  const subjectKeys = Object.keys(subjects);
+  currentSubject = subjectKeys[Math.floor(Math.random() * subjectKeys.length)];
+
+  const englishPrompt =
+    subjects[currentSubject] +
+    " was " +
+    currentVerb +
+    "ing";
+
+  document.getElementById("prompt").textContent = englishPrompt;
+  document.getElementById("answer").value = "";
+  document.getElementById("feedback").textContent = "";
+}
+
+function checkAnswer() {
+  const userInput = stripAccents(
+    document.getElementById("answer").value.trim().toLowerCase()
+  );
+
+  const correctForms =
+    verbs[currentVerb].imperfect[currentSubject];
+
+  const normalizedCorrect = correctForms.map(form =>
+    stripAccents(form.toLowerCase())
+  );
+
+  if (normalizedCorrect.includes(userInput)) {
+    document.getElementById("feedback").textContent =
+      "✅ Correct! (" + correctForms.join(" / ") + ")";
+    newQuestion();
+  } else {
+    document.getElementById("feedback").textContent =
+      "❌ Incorrect. Correct answer: " + correctForms.join(" / ");
+  }
+}
+
+/* -----------------------------
+   ENTER KEY SUPPORT
+--------------------------------*/
+
+document.getElementById("answer").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    checkAnswer();
+  }
+});
+
+/* -----------------------------
+   START
+--------------------------------*/
+
+newQuestion();
+</script>
+
+</body>
+</html>
